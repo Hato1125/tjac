@@ -17,7 +17,6 @@ target('libtjac')
   add_files('src/*.cc')
   add_includedirs('src')
 
--- test/ と playground/ はローカル専用 (git管理外) なので、ある場合だけ定義する
 if os.isdir(path.join(os.scriptdir(), 'test')) then
   target('test')
     set_kind('binary')
@@ -28,7 +27,6 @@ if os.isdir(path.join(os.scriptdir(), 'test')) then
     add_tests('default')
 end
 
--- 雑デバッグ用の遊び場。中身は自由に書き換えてよい
 if os.isdir(path.join(os.scriptdir(), 'playground')) then
   target('playground')
     set_kind('binary')

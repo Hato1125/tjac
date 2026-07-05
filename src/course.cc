@@ -1,3 +1,5 @@
+#include <charconv>
+
 #include "course.hh"
 #include "cue.hh"
 #include "stmt.hh"
@@ -45,12 +47,13 @@ namespace tjac {
       if (auto rs = header::parse(line); !rs) {
         return std::unexpected{ err::header_parsing_failed };
       } else {
-        if (rs->name == "COURSE") {
-          _kind = parse_kind(rs->value);
-        } else if (rs->name == "LEVEL") {
-          std::from_chars(rs->value.begin(), rs->value.end(), _level);
+        const auto [name, value] = *rs;
+        if (name == "COURSE") {
+          _kind = parse_kind(value);
+        } else if (name == "LEVEL") {
+          std::from_chars(value.begin(), value.end(), _level);
         } else if (rs->name == "BALLOON") {
-          std::from_chars(rs->value.begin(), rs->value.end(), _balloon);
+          std::from_chars(value.begin(), value.end(), _balloon);
         }
       }
     }
@@ -76,13 +79,14 @@ namespace tjac {
         if (auto rs = command::parse(line); !rs) {
           return std::unexpected{ err::command_parsing_failed };
         } else {
-          if (rs->name == "GOGOSTART") {
+          const auto [name, value] = *rs;
+          if (name == "GOGOSTART") {
             _events.emplace_back(event::kind::gogo_begin, time);
-          } else if (rs->name == "GOGOEND") {
+          } else if (name == "GOGOEND") {
             _events.emplace_back(event::kind::gogo_end, time);
-          } else if (rs->name == "BARLINEON") {
+          } else if (name == "BARLINEON") {
             _events.emplace_back(event::kind::bar_on, time);
-          } else if (rs->name == "BARLINEOFF") {
+          } else if (name == "BARLINEOFF") {
             _events.emplace_back(event::kind::bar_off, time);
           } else {
             pending.emplace_back(buffer.size(), std::move(*rs));
@@ -92,6 +96,25 @@ namespace tjac {
       }
 
       for (char ch : line.str) {
+        // ',' closes a measure. note chars just pile up in `buffer`
+        // (possibly across several lines) until then, because the
+        // measure is divided evenly by its char count and that count
+        // is only known here. on close: emit a bar line at the head,
+        // then walk the chars, giving each 1/n of the measure
+        // (240/bpm * a/b seconds in total).
+        //
+        //   input:  "12"  #bpmchange 240  "12,"
+        //
+        //   buffer:  1    2    1    2       (n = 4)
+        //   pending:         ^ { pos = 2, bpmchange 240 }
+        //   time:    0.0  0.5  1.0  1.25
+        //            [ bpm 120 ][ bpm 240 ]
+        //
+        // mid-measure commands are applied when the walk reaches the
+        // buffer position they appeared at (pos), so only the chars
+        // after them see the new bpm/scroll. an empty buffer means a
+        // ","-only measure: no notes, time still advances by one full
+        // measure.
         if (ch == ',') {
           _bars.emplace_back(time, bpm, scroll);
 
@@ -102,16 +125,17 @@ namespace tjac {
             for (auto i = 0uz; i < n; ++i) {
               for (auto& [pos, cmd] : pending) {
                 if (i == pos) {
-                  if (cmd.name == "MEASURE") {
-                    if (auto rs2 = measure::parse(cmd.value); !rs2) {
+                  const auto [name, value] = cmd;
+                  if (name == "MEASURE") {
+                    if (auto rs2 = measure::parse(value); !rs2) {
                       return std::unexpected{ err::command_parsing_failed };
                     } else {
                       ms = *rs2;
                     }
-                  } else if (cmd.name == "BPMCHANGE") {
-                    std::from_chars(cmd.value.begin(), cmd.value.end(), bpm);
-                  } else if (cmd.name == "SCROLL") {
-                    std::from_chars(cmd.value.begin(), cmd.value.end(), scroll);
+                  } else if (name == "BPMCHANGE") {
+                    std::from_chars(value.begin(), value.end(), bpm);
+                  } else if (name == "SCROLL") {
+                    std::from_chars(value.begin(), value.end(), scroll);
                   }
                 }
               }
