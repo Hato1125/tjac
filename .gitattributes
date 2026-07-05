@@ -1,0 +1,21 @@
+* text=auto eol=lf
+
+*.cc text diff=cpp
+*.hh text diff=cpp
+
+*.lua text
+xmake.lua text
+
+*.md text diff=markdown
+*.txt text
+*.json text
+*.yml text
+*.yaml text
+.gitignore text
+.gitattributes text
+
+*.png binary
+*.qoi binary
+*.jpg binary
+*.ogg binary
+*.wav binary
