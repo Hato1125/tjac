@@ -12,6 +12,12 @@
 
 namespace tjac {
   class course {
+    struct pending {
+      std::uint32_t line;
+      std::size_t pos;
+      command cmd;
+    };
+
   public:
     enum class kind : std::uint8_t {
       easy,
@@ -30,16 +36,9 @@ namespace tjac {
 
     [[nodiscard]] std::expected<void, error> parse(std::span<const line> lines);
 
-  // debug: private:
-    struct pending {
-      std::uint32_t line;
-      std::size_t pos;
-      command cmd;
-    };
-
-    kind _kind;
-    std::uint8_t _level;
-    std::uint16_t _balloon;
+    kind difficulty;
+    std::uint8_t level;
+    std::uint16_t balloon;
 
     std::vector<note> _notes;
     std::vector<event> _events;

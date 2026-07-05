@@ -63,11 +63,11 @@ namespace tjac {
       } else {
         const auto [name, value] = *rs;
         if (name == "COURSE") {
-          _kind = kind_of(value);
+          difficulty = kind_of(value);
         } else if (name == "LEVEL") {
-          std::from_chars(value.begin(), value.end(), _level);
+          std::from_chars(value.begin(), value.end(), level);
         } else if (rs->name == "BALLOON") {
-          std::from_chars(value.begin(), value.end(), _balloon);
+          std::from_chars(value.begin(), value.end(), balloon);
         }
       }
     }
