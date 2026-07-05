@@ -48,7 +48,7 @@ namespace tjac {
     [[nodiscard]] std::expected<void, error> header_parse(std::span<const line> lines);
     [[nodiscard]] std::expected<void, error> body_parse(std::span<const line> lines);
 
-    [[nodiscard]] static kind parse_kind(std::string_view str) noexcept;
+    [[nodiscard]] static kind kind_of(std::string_view str) noexcept;
     [[nodiscard]] static bool is_equal(
       std::string_view a,
       std::string_view b

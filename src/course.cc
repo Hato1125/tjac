@@ -63,7 +63,7 @@ namespace tjac {
       } else {
         const auto [name, value] = *rs;
         if (name == "COURSE") {
-          _kind = parse_kind(value);
+          _kind = kind_of(value);
         } else if (name == "LEVEL") {
           std::from_chars(value.begin(), value.end(), _level);
         } else if (rs->name == "BALLOON") {
@@ -183,47 +183,12 @@ namespace tjac {
     return {};
   }
 
-  course::kind course::parse_kind(std::string_view str) noexcept {
-    if (is_equal(str, "easy")
-      || is_equal(str, "1")
-      || str == "かんたん"
-      || str == "簡単"
-    ) {
-      return kind::easy;
-    }
-
-    if (is_equal(str, "normal")
-      || is_equal(str, "2")
-      || str == "ふつう"
-      || str == "普通"
-    ) {
-      return kind::normal;
-    }
-
-    if (is_equal(str, "hard")
-      || is_equal(str, "3")
-      || str == "むずかしい"
-      || str == "難しい"
-    ) {
-      return kind::hard;
-    }
-
-    if (is_equal(str, "oni")
-      || is_equal(str, "4")
-      || str == "おに"
-      || str == "鬼"
-    ) {
-      return kind::oni;
-    }
-
-    if (is_equal(str, "edit")
-      || is_equal(str, "5")
-      || str == "うらおに"
-      || str == "裏鬼"
-    ) {
-      return kind::edit;
-    }
-
+  course::kind course::kind_of(std::string_view str) noexcept {
+    if (is_equal(str, "easy") || str == "1") { return kind::easy; }
+    if (is_equal(str, "normal") || str == "2") { return kind::normal; }
+    if (is_equal(str, "hard") || str == "3") { return kind::hard; }
+    if (is_equal(str, "oni") || str == "4") { return kind::oni; }
+    if (is_equal(str, "edit") || str == "5") { return kind::edit; }
     return kind::easy;
   }
 
