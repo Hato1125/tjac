@@ -5,7 +5,7 @@
 #include "stmt.hh"
 
 namespace tjac {
-  std::expected<void, course::err> course::parse(std::span<const line> lines) {
+  std::expected<void, error> course::parse(std::span<const line> lines) {
     auto spos = 0uz;
     for (; spos < lines.size(); ++spos) {
       if (auto c = command::parse(lines[spos]); c && c->name == "START") {
@@ -13,7 +13,14 @@ namespace tjac {
       }
     }
     if (spos == lines.size()) {
-      return std::unexpected{ err::missing_start };
+      return std::unexpected(
+        error{
+          .code = error::code::missing_statement,
+          .message = "course has no #START command",
+          .line = lines.empty() ? 0 : lines.front().line,
+          .column = 0,
+        }
+      );
     }
 
     auto epos = spos + 1;
@@ -24,28 +31,35 @@ namespace tjac {
     }
 
     if (epos == lines.size()) {
-      return std::unexpected{ err::missing_end };
+      return std::unexpected(
+        error{
+          .code = error::code::missing_statement,
+          .message = "#START has no matching #END",
+          .line = lines[spos].line,
+          .column = 0,
+        }
+      );
     }
 
     if (auto rs = header_parse(lines.first(spos)); !rs) {
-      return std::unexpected{ rs.error() };
+      return std::unexpected(rs.error());
     }
 
     if (auto rs = body_parse(lines.subspan(spos + 1, epos - spos - 1)); !rs) {
-      return std::unexpected{ rs.error() };
+      return std::unexpected(rs.error());
     }
 
     return {};
   }
 
-  std::expected<void, course::err> course::header_parse(std::span<const line> lines) {
+  std::expected<void, error> course::header_parse(std::span<const line> lines) {
     for (const auto& line : lines) {
       if (line.str.empty()) {
         continue;
       }
 
       if (auto rs = header::parse(line); !rs) {
-        return std::unexpected{ err::header_parsing_failed };
+        return std::unexpected(rs.error());
       } else {
         const auto [name, value] = *rs;
         if (name == "COURSE") {
@@ -61,14 +75,14 @@ namespace tjac {
     return {};
   }
 
-  std::expected<void, course::err> course::body_parse(std::span<const line> lines) {
+  std::expected<void, error> course::body_parse(std::span<const line> lines) {
     float time = 0.0f;
     float bpm = 120.0f;
     float scroll = 1.0f;
     measure ms{ 4.0f, 4.0f };
 
     std::vector<char> buffer;
-    std::vector<std::pair<decltype(buffer)::size_type, command>> pending;
+    std::vector<pending> pendings;
 
     for (const auto& line : lines) {
       if (line.str.empty()) {
@@ -77,7 +91,7 @@ namespace tjac {
 
       if (line.str[0] == '#') {
         if (auto rs = command::parse(line); !rs) {
-          return std::unexpected{ err::command_parsing_failed };
+          return std::unexpected(rs.error());
         } else {
           const auto [name, value] = *rs;
           if (name == "GOGOSTART") {
@@ -89,7 +103,11 @@ namespace tjac {
           } else if (name == "BARLINEOFF") {
             _events.emplace_back(event::kind::bar_off, time);
           } else {
-            pending.emplace_back(buffer.size(), std::move(*rs));
+            pendings.emplace_back(
+              line.line,
+              buffer.size(),
+              std::move(*rs)
+            );
           }
         }
         continue;
@@ -123,12 +141,12 @@ namespace tjac {
           } else {
             auto n = buffer.size();
             for (auto i = 0uz; i < n; ++i) {
-              for (auto& [pos, cmd] : pending) {
+              for (auto& [line, pos, cmd] : pendings) {
                 if (i == pos) {
                   const auto [name, value] = cmd;
                   if (name == "MEASURE") {
-                    if (auto rs2 = measure::parse(value); !rs2) {
-                      return std::unexpected{ err::command_parsing_failed };
+                    if (auto rs2 = measure::parse(value, line); !rs2) {
+                      return std::unexpected(rs2.error());
                     } else {
                       ms = *rs2;
                     }
@@ -153,7 +171,7 @@ namespace tjac {
           }
 
           buffer.clear();
-          pending.clear();
+          pendings.clear();
 
           continue;
         }
