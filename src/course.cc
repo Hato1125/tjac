@@ -1,4 +1,5 @@
 #include <charconv>
+#include <format>
 
 #include "course.hh"
 #include "cue.hh"
@@ -147,19 +148,40 @@ namespace tjac {
             auto n = buffer.size();
             for (auto i = 0uz; i < n; ++i) {
               for (auto& [line, pos, cmd] : pendings) {
-                if (i == pos) {
-                  const auto [name, value] = cmd;
-                  if (name == "MEASURE") {
-                    if (auto rs2 = measure::parse(value, line); !rs2) {
-                      return std::unexpected(rs2.error());
-                    } else {
-                      ms = *rs2;
-                    }
-                  } else if (name == "BPMCHANGE") {
-                    std::from_chars(value.begin(), value.end(), bpm);
-                  } else if (name == "SCROLL") {
-                    std::from_chars(value.begin(), value.end(), scroll);
+                if (i != pos) {
+                  continue;
+                }
+
+                const auto [name, value] = cmd;
+
+                if (name == "MEASURE") {
+                  if (auto rs2 = measure::parse(value, line); !rs2) {
+                    return std::unexpected(rs2.error());
+                  } else {
+                    ms = *rs2;
                   }
+                } else if (name == "BPMCHANGE") {
+                  std::from_chars(value.begin(), value.end(), bpm);
+                } else if (name == "SCROLL") {
+                  std::from_chars(value.begin(), value.end(), scroll);
+                } else if (name == "DELAY") {
+                  float delay = 0.0f;
+                  const auto [ptr, ec] = std::from_chars(
+                    value.begin(),
+                    value.end(),
+                    delay
+                  );
+                  if (ec != std::errc{} || ptr != value.end()) {
+                    return std::unexpected(
+                      error{
+                        .code = error::code::failed_convert_value,
+                        .message = std::format("invalid number '{}' for #DELAY", value),
+                        .line = line,
+                        .column = static_cast<std::uint32_t>(ptr - value.data()),
+                      }
+                    );
+                  }
+                  time += delay;
                 }
               }
 
@@ -171,7 +193,7 @@ namespace tjac {
                   scroll
                 );
               }
-              time += 240.0f / bpm * ms.rate() / static_cast<float>(n);
+              time += 240.0f / bpm * ms.rate() / n;
             }
           }
 
