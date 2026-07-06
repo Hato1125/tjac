@@ -34,7 +34,11 @@ namespace tjac {
       command_parsing_failed,
     };
 
-    [[nodiscard]] std::expected<void, error> parse(std::span<const line> lines);
+    // bpm はファイルヘッダ BPM: の値 (小節の長さの初期値になる)
+    [[nodiscard]] std::expected<void, error> parse(
+      std::span<const line> lines,
+      float bpm = 120.0f
+    );
 
     kind difficulty;
     std::uint8_t level;
@@ -45,7 +49,10 @@ namespace tjac {
     std::vector<bar> _bars;
 
     [[nodiscard]] std::expected<void, error> header_parse(std::span<const line> lines);
-    [[nodiscard]] std::expected<void, error> body_parse(std::span<const line> lines);
+    [[nodiscard]] std::expected<void, error> body_parse(
+      std::span<const line> lines,
+      float bpm
+    );
 
     [[nodiscard]] static kind kind_of(std::string_view str) noexcept;
     [[nodiscard]] static bool is_equal(

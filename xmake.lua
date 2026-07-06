@@ -34,5 +34,5 @@ if os.isdir(path.join(os.scriptdir(), 'playground')) then
     add_files('playground/*.cc')
     add_includedirs('src')
     add_deps('libtjac')
-    add_links('SDL3')
+    add_links('SDL3', 'vorbisfile', 'mpg123')
 end

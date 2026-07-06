@@ -5,7 +5,10 @@
 #include "stmt.hh"
 
 namespace tjac {
-  std::expected<void, error> course::parse(std::span<const line> lines) {
+  std::expected<void, error> course::parse(
+    std::span<const line> lines,
+    float bpm
+  ) {
     auto spos = 0uz;
     for (; spos < lines.size(); ++spos) {
       if (auto c = command::parse(lines[spos]); c && c->name == "START") {
@@ -45,7 +48,7 @@ namespace tjac {
       return std::unexpected(rs.error());
     }
 
-    if (auto rs = body_parse(lines.subspan(spos + 1, epos - spos - 1)); !rs) {
+    if (auto rs = body_parse(lines.subspan(spos + 1, epos - spos - 1), bpm); !rs) {
       return std::unexpected(rs.error());
     }
 
@@ -75,9 +78,11 @@ namespace tjac {
     return {};
   }
 
-  std::expected<void, error> course::body_parse(std::span<const line> lines) {
+  std::expected<void, error> course::body_parse(
+    std::span<const line> lines,
+    float bpm
+  ) {
     float time = 0.0f;
-    float bpm = 120.0f;
     float scroll = 1.0f;
     measure ms{ 4.0f, 4.0f };
 
@@ -166,7 +171,7 @@ namespace tjac {
                   scroll
                 );
               }
-              time += 240.0f / bpm * ms.rate() / n;
+              time += 240.0f / bpm * ms.rate() / static_cast<float>(n);
             }
           }
 
