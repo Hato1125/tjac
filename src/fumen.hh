@@ -24,6 +24,8 @@ namespace tjac {
       localized_text&& title,
       localized_text&& subtitle,
       std::string& wave,
+      std::string& genre,
+      std::string& maker,
       float bpm,
       float offset,
       float demostart,
@@ -39,6 +41,8 @@ namespace tjac {
     [[nodiscard]] localized_text& title() noexcept;
     [[nodiscard]] localized_text& subtitle() noexcept;
     [[nodiscard]] std::string& wave() noexcept;
+    [[nodiscard]] std::string& genre() noexcept;
+    [[nodiscard]] std::string& maker() noexcept;
     [[nodiscard]] float bpm() const noexcept;
     [[nodiscard]] float offset() const noexcept;
     [[nodiscard]] float demostart() const noexcept;
@@ -48,6 +52,8 @@ namespace tjac {
     localized_text _title;
     localized_text _subtitle;
     std::string _wave;
+    std::string _genre;
+    std::string _maker;
     float _bpm;
     float _offset;
     float _demostart;

@@ -37,6 +37,8 @@ namespace tjac {
     localized_text title;
     localized_text subtitle;
     std::string wave;
+    std::string genre;
+    std::string maker;
     float bpm = 120.0f;
     float offset = 0.0f;
     float demostart = 0.0f;
@@ -65,6 +67,10 @@ namespace tjac {
           subtitle.tw = value;
         } else if (name == "WAVE") {
           wave = value;
+        } else if (name == "GENRE") {
+          genre = value;
+        } else if (name == "MAKER") {
+          maker = value;
         } else if (name == "BPM") {
           std::from_chars(value.begin(), value.end(), bpm);
         } else if (name == "OFFSET") {
@@ -113,6 +119,8 @@ namespace tjac {
       std::move(title),
       std::move(subtitle),
       wave,
+      genre,
+      maker,
       bpm,
       offset,
       demostart,
@@ -124,6 +132,8 @@ namespace tjac {
     localized_text&& title,
     localized_text&& subtitle,
     std::string& wave,
+    std::string& genre,
+    std::string& maker,
     float bpm,
     float offset,
     float demostart,
@@ -131,6 +141,8 @@ namespace tjac {
   ) noexcept : _title(std::move(title)),
     _subtitle(std::move(subtitle)),
     _wave(wave),
+    _genre(genre),
+    _maker(maker),
     _bpm(bpm),
     _offset(offset),
     _demostart(demostart),
@@ -139,6 +151,8 @@ namespace tjac {
   localized_text& fumen::title() noexcept { return _title; }
   localized_text& fumen::subtitle() noexcept { return _subtitle; }
   std::string& fumen::wave() noexcept { return _wave; }
+  std::string& fumen::genre() noexcept { return _genre; }
+  std::string& fumen::maker() noexcept { return _maker; }
   float fumen::bpm() const noexcept { return _bpm; }
   float fumen::offset() const noexcept { return _offset; }
   float fumen::demostart() const noexcept { return _demostart; }
