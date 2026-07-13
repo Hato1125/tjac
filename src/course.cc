@@ -140,6 +140,55 @@ namespace tjac {
         // ","-only measure: no notes, time still advances by one full
         // measure.
         if (ch == ',') {
+          const auto apply_pendings_at = [&](std::size_t pos)
+            -> std::expected<void, error> {
+            for (auto& [line, pending_pos, cmd] : pendings) {
+              if (pos != pending_pos) {
+                continue;
+              }
+
+              const auto [name, value] = cmd;
+
+              if (name == "MEASURE") {
+                if (auto rs2 = measure::parse(value, line); !rs2) {
+                  return std::unexpected(rs2.error());
+                } else {
+                  ms = *rs2;
+                }
+              } else if (name == "BPMCHANGE") {
+                std::from_chars(value.begin(), value.end(), bpm);
+              } else if (name == "SCROLL") {
+                std::from_chars(value.begin(), value.end(), scroll);
+              } else if (name == "DELAY") {
+                float delay = 0.0f;
+                const auto [ptr, ec] = std::from_chars(
+                  value.begin(),
+                  value.end(),
+                  delay
+                );
+                if (ec != std::errc{} || ptr != value.end()) {
+                  return std::unexpected(
+                    error{
+                      .code = error::code::failed_convert_value,
+                      .message = std::format("invalid number '{}' for #DELAY", value),
+                      .line = line,
+                      .column = static_cast<std::uint32_t>(ptr - value.data()),
+                    }
+                  );
+                }
+                time += delay;
+              }
+            }
+
+            return {};
+          };
+
+          // Apply commands pending at the start of the measure before
+          // creating the bar line so that they affect it as well.
+          if (auto rs = apply_pendings_at(0); !rs) {
+            return std::unexpected(rs.error());
+          }
+
           bars.emplace_back(time, bpm, scroll);
 
           if (buffer.empty()) {
@@ -147,41 +196,9 @@ namespace tjac {
           } else {
             auto n = buffer.size();
             for (auto i = 0uz; i < n; ++i) {
-              for (auto& [line, pos, cmd] : pendings) {
-                if (i != pos) {
-                  continue;
-                }
-
-                const auto [name, value] = cmd;
-
-                if (name == "MEASURE") {
-                  if (auto rs2 = measure::parse(value, line); !rs2) {
-                    return std::unexpected(rs2.error());
-                  } else {
-                    ms = *rs2;
-                  }
-                } else if (name == "BPMCHANGE") {
-                  std::from_chars(value.begin(), value.end(), bpm);
-                } else if (name == "SCROLL") {
-                  std::from_chars(value.begin(), value.end(), scroll);
-                } else if (name == "DELAY") {
-                  float delay = 0.0f;
-                  const auto [ptr, ec] = std::from_chars(
-                    value.begin(),
-                    value.end(),
-                    delay
-                  );
-                  if (ec != std::errc{} || ptr != value.end()) {
-                    return std::unexpected(
-                      error{
-                        .code = error::code::failed_convert_value,
-                        .message = std::format("invalid number '{}' for #DELAY", value),
-                        .line = line,
-                        .column = static_cast<std::uint32_t>(ptr - value.data()),
-                      }
-                    );
-                  }
-                  time += delay;
+              if (i != 0) {
+                if (auto rs = apply_pendings_at(i); !rs) {
+                  return std::unexpected(rs.error());
                 }
               }
 
@@ -194,6 +211,10 @@ namespace tjac {
                 );
               }
               time += 240.0f / bpm * ms.rate() / n;
+            }
+
+            if (auto rs = apply_pendings_at(n); !rs) {
+              return std::unexpected(rs.error());
             }
           }
 
