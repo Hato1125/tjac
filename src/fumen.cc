@@ -22,7 +22,11 @@ namespace tjac {
     auto lines = src
       | std::views::split('\n')
       | std::views::transform([](auto&& r) {
-          return trim(std::string_view{r.begin(), r.end()});
+          std::string_view str{r.begin(), r.end()};
+          if (auto pos = str.find("//"); pos != std::string_view::npos) {
+            str = std::string_view{str.substr(0, pos)};
+          }
+          return trim(str);
         })
       | std::views::enumerate
       | std::views::filter([](auto&& t) {
