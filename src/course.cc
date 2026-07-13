@@ -101,13 +101,13 @@ namespace tjac {
         } else {
           const auto [name, value] = *rs;
           if (name == "GOGOSTART") {
-            _events.emplace_back(event::kind::gogo_begin, time);
+            events.emplace_back(event::kind::gogo_begin, time);
           } else if (name == "GOGOEND") {
-            _events.emplace_back(event::kind::gogo_end, time);
+            events.emplace_back(event::kind::gogo_end, time);
           } else if (name == "BARLINEON") {
-            _events.emplace_back(event::kind::bar_on, time);
+            events.emplace_back(event::kind::bar_on, time);
           } else if (name == "BARLINEOFF") {
-            _events.emplace_back(event::kind::bar_off, time);
+            events.emplace_back(event::kind::bar_off, time);
           } else {
             pendings.emplace_back(
               line.line,
@@ -140,7 +140,7 @@ namespace tjac {
         // ","-only measure: no notes, time still advances by one full
         // measure.
         if (ch == ',') {
-          _bars.emplace_back(time, bpm, scroll);
+          bars.emplace_back(time, bpm, scroll);
 
           if (buffer.empty()) {
             time += 240.0f / bpm * ms.rate();
@@ -186,7 +186,7 @@ namespace tjac {
               }
 
               if (buffer[i] != '0') {
-                _notes.emplace_back(
+                notes.emplace_back(
                   note::kind_of(buffer[i]),
                   time,
                   bpm,

@@ -34,7 +34,6 @@ namespace tjac {
       command_parsing_failed,
     };
 
-    // bpm はファイルヘッダ BPM: の値 (小節の長さの初期値になる)
     [[nodiscard]] std::expected<void, error> parse(
       std::span<const line> lines,
       float bpm = 120.0f
@@ -44,9 +43,9 @@ namespace tjac {
     std::uint8_t level;
     std::uint16_t balloon;
 
-    std::vector<note> _notes;
-    std::vector<event> _events;
-    std::vector<bar> _bars;
+    std::vector<note> notes;
+    std::vector<event> events;
+    std::vector<bar> bars;
 
     [[nodiscard]] std::expected<void, error> header_parse(std::span<const line> lines);
     [[nodiscard]] std::expected<void, error> body_parse(
