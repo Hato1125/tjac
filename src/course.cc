@@ -1,9 +1,7 @@
-#include <charconv>
-#include <format>
-
 #include "course.hh"
 #include "cue.hh"
 #include "stmt.hh"
+#include "utils.hh"
 
 namespace tjac {
   std::expected<void, error> course::parse(
@@ -69,38 +67,9 @@ namespace tjac {
         if (name == "COURSE") {
           difficulty = kind_of(value);
         } else if (name == "LEVEL") {
-          level = 0;
-          const auto [ptr, ec] = std::from_chars(
-            value.begin(),
-            value.end(),
-            level
-          );
-          if (ec != std::errc{} || ptr != value.end()) {
-            return std::unexpected(
-              error{
-                .code = error::code::failed_convert_value,
-                .message = std::format("invalid number '{}' for LEVEL", value),
-                .line = line.line,
-                .column = static_cast<std::uint32_t>(ptr - value.data()),
-              }
-            );
-          }
-        } else if (rs->name == "BALLOON") {
-          const auto [ptr, ec] = std::from_chars(
-            value.begin(),
-            value.end(),
-            balloon
-          );
-          if (ec != std::errc{} || ptr != value.end()) {
-            return std::unexpected(
-              error{
-                .code = error::code::failed_convert_value,
-                .message = std::format("invalid number '{}' for BALLOON", value),
-                .line = line.line,
-                .column = static_cast<std::uint32_t>(ptr - value.data()),
-              }
-            );
-          }
+          TJAC_TRY_TO_NUM(level, std::uint8_t, value, "LEVEL", line.line);
+        } else if (name == "BALLOON") {
+          TJAC_TRY_TO_NUM(balloon, std::uint16_t, value, "BALLOON", line.line);
         }
       }
     }
@@ -185,26 +154,12 @@ namespace tjac {
                   ms = *rs2;
                 }
               } else if (name == "BPMCHANGE") {
-                std::from_chars(value.begin(), value.end(), bpm);
+                TJAC_TRY_TO_NUM(bpm, float, value, "#BPMCHANGE", line);
               } else if (name == "SCROLL") {
-                std::from_chars(value.begin(), value.end(), scroll);
+                TJAC_TRY_TO_NUM(scroll, float, value, "#SCROLL", line);
               } else if (name == "DELAY") {
                 float delay = 0.0f;
-                const auto [ptr, ec] = std::from_chars(
-                  value.begin(),
-                  value.end(),
-                  delay
-                );
-                if (ec != std::errc{} || ptr != value.end()) {
-                  return std::unexpected(
-                    error{
-                      .code = error::code::failed_convert_value,
-                      .message = std::format("invalid number '{}' for #DELAY", value),
-                      .line = line,
-                      .column = static_cast<std::uint32_t>(ptr - value.data()),
-                    }
-                  );
-                }
+                TJAC_TRY_TO_NUM(delay, float, value, "#DELAY", line);
                 time += delay;
               }
             }
