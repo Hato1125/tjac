@@ -69,9 +69,38 @@ namespace tjac {
         if (name == "COURSE") {
           difficulty = kind_of(value);
         } else if (name == "LEVEL") {
-          std::from_chars(value.begin(), value.end(), level);
+          level = 0;
+          const auto [ptr, ec] = std::from_chars(
+            value.begin(),
+            value.end(),
+            level
+          );
+          if (ec != std::errc{} || ptr != value.end()) {
+            return std::unexpected(
+              error{
+                .code = error::code::failed_convert_value,
+                .message = std::format("invalid number '{}' for LEVEL", value),
+                .line = line.line,
+                .column = static_cast<std::uint32_t>(ptr - value.data()),
+              }
+            );
+          }
         } else if (rs->name == "BALLOON") {
-          std::from_chars(value.begin(), value.end(), balloon);
+          const auto [ptr, ec] = std::from_chars(
+            value.begin(),
+            value.end(),
+            balloon
+          );
+          if (ec != std::errc{} || ptr != value.end()) {
+            return std::unexpected(
+              error{
+                .code = error::code::failed_convert_value,
+                .message = std::format("invalid number '{}' for BALLOON", value),
+                .line = line.line,
+                .column = static_cast<std::uint32_t>(ptr - value.data()),
+              }
+            );
+          }
         }
       }
     }

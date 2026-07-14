@@ -40,8 +40,8 @@ namespace tjac {
     );
 
     kind difficulty;
-    std::uint8_t level;
-    std::uint16_t balloon;
+    std::uint8_t level = 0;
+    std::uint16_t balloon = 0;
 
     std::vector<note> notes;
     std::vector<event> events;
