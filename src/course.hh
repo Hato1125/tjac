@@ -11,6 +11,14 @@
 #include "tjac.hh"
 
 namespace tjac {
+  enum class course_kind : std::uint8_t {
+    easy,
+    normal,
+    hard,
+    oni,
+    edit,
+  };
+
   class course {
     struct pending {
       std::uint32_t line;
@@ -19,27 +27,12 @@ namespace tjac {
     };
 
   public:
-    enum class kind : std::uint8_t {
-      easy,
-      normal,
-      hard,
-      oni,
-      edit,
-    };
-
-    enum class err : std::uint8_t {
-      missing_start,
-      missing_end,
-      header_parsing_failed,
-      command_parsing_failed,
-    };
-
     [[nodiscard]] std::expected<void, error> parse(
       std::span<const line> lines,
       float bpm = 120.0f
     );
 
-    kind difficulty;
+    course_kind difficulty;
     std::uint8_t level = 0;
     std::uint16_t balloon = 0;
 
@@ -53,7 +46,7 @@ namespace tjac {
       float bpm
     );
 
-    [[nodiscard]] static kind kind_of(std::string_view str) noexcept;
+    [[nodiscard]] static course_kind kind_of(std::string_view str) noexcept;
     [[nodiscard]] static bool is_equal(
       std::string_view a,
       std::string_view b

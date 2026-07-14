@@ -99,13 +99,13 @@ namespace tjac {
         } else {
           const auto [name, value] = *rs;
           if (name == "GOGOSTART") {
-            events.emplace_back(event::kind::gogo_begin, time);
+            events.emplace_back(event_kind::gogo_begin, time);
           } else if (name == "GOGOEND") {
-            events.emplace_back(event::kind::gogo_end, time);
+            events.emplace_back(event_kind::gogo_end, time);
           } else if (name == "BARLINEON") {
-            events.emplace_back(event::kind::bar_on, time);
+            events.emplace_back(event_kind::bar_on, time);
           } else if (name == "BARLINEOFF") {
-            events.emplace_back(event::kind::bar_off, time);
+            events.emplace_back(event_kind::bar_off, time);
           } else {
             pendings.emplace_back(
               line.line,
@@ -215,13 +215,13 @@ namespace tjac {
     return {};
   }
 
-  course::kind course::kind_of(std::string_view str) noexcept {
-    if (is_equal(str, "easy") || str == "1") { return kind::easy; }
-    if (is_equal(str, "normal") || str == "2") { return kind::normal; }
-    if (is_equal(str, "hard") || str == "3") { return kind::hard; }
-    if (is_equal(str, "oni") || str == "4") { return kind::oni; }
-    if (is_equal(str, "edit") || str == "5") { return kind::edit; }
-    return kind::easy;
+  course_kind course::kind_of(std::string_view str) noexcept {
+    if (is_equal(str, "easy") || str == "1") { return course_kind::easy; }
+    if (is_equal(str, "normal") || str == "2") { return course_kind::normal; }
+    if (is_equal(str, "hard") || str == "3") { return course_kind::hard; }
+    if (is_equal(str, "oni") || str == "4") { return course_kind::oni; }
+    if (is_equal(str, "edit") || str == "5") { return course_kind::edit; }
+    return course_kind::easy;
   }
 
   bool course::is_equal(

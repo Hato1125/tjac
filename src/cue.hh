@@ -4,33 +4,33 @@
 #include <cstdint>
 
 namespace tjac {
-  struct note {
-    enum class kind : std::uint8_t {
-      don,
-      ka,
-      don_big,
-      ka_big,
-    };
+  enum class note_kind : std::uint8_t {
+    don,
+    ka,
+    don_big,
+    ka_big,
+  };
 
-    kind kind;
+  struct note {
+    note_kind kind;
     float time;
     float bpm;
     float scroll;
     bool hitted;
     bool visible;
 
-    [[nodiscard]] static decltype(note::kind) kind_of(char ch) noexcept;
+    [[nodiscard]] static note_kind kind_of(char ch) noexcept;
+  };
+
+  enum class event_kind : std::uint8_t {
+    gogo_begin,
+    gogo_end,
+    bar_on,
+    bar_off,
   };
 
   struct event {
-    enum class kind : std::uint8_t {
-      gogo_begin,
-      gogo_end,
-      bar_on,
-      bar_off,
-    };
-
-    kind kind;
+    event_kind kind;
     float time;
   };
 
