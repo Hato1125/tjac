@@ -5,10 +5,16 @@
 
 namespace tjac {
   enum class note_kind : std::uint8_t {
+    none,
     don,
     ka,
     don_big,
     ka_big,
+    roll,
+    roll_big,
+    ballon,
+    roll_end,
+    kusudama,
   };
 
   struct note {
