@@ -36,6 +36,12 @@ namespace tjac {
     std::uint8_t level = 0;
     std::uint16_t balloon = 0;
 
+    std::int32_t hp_max = 0;
+    std::int32_t hp_clear = 0;
+    std::int32_t hp_gain_good = 0;
+    std::int32_t hp_gain_ok = 0;
+    std::int32_t hp_loss_bad = 0;
+
     std::vector<note> notes;
     std::vector<event> events;
     std::vector<bar> bars;

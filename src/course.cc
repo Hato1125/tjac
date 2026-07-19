@@ -70,6 +70,22 @@ namespace tjac {
           TJAC_TRY_TO_NUM(level, std::uint8_t, value, "LEVEL", line.line);
         } else if (name == "BALLOON") {
           TJAC_TRY_TO_NUM(balloon, std::uint16_t, value, "BALLOON", line.line);
+        } else if (name == "HPMAX") {
+          TJAC_TRY_TO_NUM(hp_max, std::int32_t, value, "HPMAX", line.line);
+        } else if (name == "HPCLEAR") {
+          TJAC_TRY_TO_NUM(hp_clear, std::int32_t, value, "HPCLEAR", line.line);
+        } else if (name == "HPGAINGOOD") {
+          TJAC_TRY_TO_NUM(
+            hp_gain_good,
+            std::int32_t,
+            value,
+            "HPGAINGOOD",
+            line.line
+          );
+        } else if (name == "HPGAINOK") {
+          TJAC_TRY_TO_NUM(hp_gain_ok, std::int32_t, value, "HPGAINOK", line.line);
+        } else if (name == "HPLOSSBAD") {
+          TJAC_TRY_TO_NUM(hp_loss_bad, std::int32_t, value, "HPLOSSBAD", line.line);
         }
       }
     }
