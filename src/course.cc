@@ -69,7 +69,25 @@ namespace tjac {
         } else if (name == "LEVEL") {
           TJAC_TRY_TO_NUM(level, std::uint8_t, value, "LEVEL", line.line);
         } else if (name == "BALLOON") {
-          TJAC_TRY_TO_NUM(balloon, std::uint16_t, value, "BALLOON", line.line);
+          balloons.clear();
+
+          for (auto begin = 0uz; begin < value.size();) {
+            const auto end = value.find(',', begin);
+            const auto item = value.substr(begin, end - begin);
+
+            if (auto rs2 = to_num<std::uint16_t>(item, "BALLOON", line.line); !rs2) {
+              auto err = rs2.error();
+              err.column += static_cast<std::uint32_t>(begin);
+              return std::unexpected(std::move(err));
+            } else {
+              balloons.push_back(*rs2);
+            }
+
+            if (end == std::string_view::npos) {
+              break;
+            }
+            begin = end + 1;
+          }
         } else if (name == "HPMAX") {
           TJAC_TRY_TO_NUM(hp_max, std::int32_t, value, "HPMAX", line.line);
         } else if (name == "HPCLEAR") {

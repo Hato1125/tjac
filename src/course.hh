@@ -34,7 +34,7 @@ namespace tjac {
 
     course_kind difficulty;
     std::uint8_t level = 0;
-    std::uint16_t balloon = 0;
+    std::vector<std::uint16_t> balloons;
 
     std::int32_t hp_max = 0;
     std::int32_t hp_clear = 0;
